@@ -1,25 +1,23 @@
 import peasy.*;
 import java.util.Collections;
 
-boolean PAUSE = false;
-int num_frame = 0;
+float RAIN_INTENSITY = 0.2f;     // mm/h
+float DELTA_TIME     = 0.02f;    // s
 
-float RAIN_INTENSITY = 0.2;     // mm/h
-float DELTA_TIME     = 0.02;    // s
-float SIZE_BOX       = 100;     // m
+float SIZE_BOX       = 100.f;    // m
 
-PVector WIND_FORCE = new PVector(-50.,25.,0.);  // m/s
-PVector WIND     = WIND_FORCE.copy();           // m/s
-PVector GRAVITY  = new PVector(0.,9.81,0.);     // m/s 
+int   DROPS_NB_MAX   = 50000;    // unitless
+float DROPS_SIZE_MIN = 2.f;      // mm
+float DROPS_SIZE_MAX = 8.f;      // mm
+float DROPS_CX       = 0.47f;
 
-int DROP_NB_MAX     = 50000;    // unitless
-float DROP_SIZE_MIN = 2.;       // mm
-float DROP_SIZE_MAX = 8.;       // mm
+PVector WIND         = new PVector(-50.,25.,0.);  // m/s
+PVector GRAVITY      = new PVector(0.,9.81,0.);   // m/s 
+
 PeasyCam camera;
-
-Drops drops;
+Drop[] drops = new Drop[DROPS_NB_MAX];
+ArrayList<Object> obstacles = new ArrayList<>();
 DropsBox dropsBox = new DropsBox(new PVector(0.,0.,0.), SIZE_BOX*0.5);
-ArrayList<Obstacle> obstacles;
 
 void setup(){
   size(1200,800,P3D);
@@ -32,21 +30,27 @@ void setup(){
   camera.setMinimumDistance(0.001f);
   camera.setMaximumDistance(1000.f);
 
-  drops = new Drops(DROP_NB_MAX,color(0,0,255));
+  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),SIZE_BOX*0.1f  ,"./assets/cube.obj"));
+  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),10.f           ,"./assets/plane.obj"));
 
-  obstacles = new ArrayList<Obstacle>();
-  obstacles.add(new Obstacle(new PVector(0.f,0.f,0.f),color(0,127,127),SIZE_BOX*0.1f  ,"./assets/cube.obj"));
-  obstacles.add(new Obstacle(new PVector(0.f,0.f,0.f),color(0,127,127),10.f           ,"./assets/plane.obj"));
+  for(int i=0; i<DROPS_NB_MAX ;i++) drops[i] = new Drop();
 }
 
 
 void draw(){ 
+  float dropsNeed = min(getNbDropsNeeded(),DROPS_NB_MAX);
+  //WIND = PVector.mult(WIND_FORCE,3.*abs(cos(frameCount*0.01)));
+ 
   /*****************************************************************************************
    *****************                        DISPLAY                        *****************
    *****************************************************************************************/
   background(0.);
-  //WIND = PVector.mult(WIND_FORCE,3.*abs(cos(frameCount*0.01)));
   lights();
+  
+  // ------ DISPLAY FRUSTRUM ------
+  beginShape(QUADS);
+  //dropsBox.vertices();
+  endShape(CLOSE);
   
   // ------ DISPLAY OBSTACLES ------
   beginShape(TRIANGLES);
@@ -54,32 +58,27 @@ void draw(){
   obstacles.forEach(o -> o.vertices());
   endShape(CLOSE);
   
-  // ------ DISPLAY FRUSTRUM ------
-  beginShape(QUADS);
-  dropsBox.vertices();
-  endShape(CLOSE);
-  
   // ------ DISPLAY DROPS ------
-  drops.vertices();
+  stroke(0,0,255);
+  for(int i=0; i<DROPS_NB_MAX ;i++) drops[i].display();
   
   // ------ DISPLAY HUD ------
   camera.beginHUD();
   fill(255);
-  text("Number drops : " + min(DROP_NB_MAX,drops.nbDropsNeeded), width*0.5,height*0.1,0);
+  text("Number drops : " + (int) dropsNeed, width*0.5,height*0.1,0);
   camera.endHUD();
   
   /*****************************************************************************************
    *****************                         UPDATE                        *****************
    *****************************************************************************************/
-  if(!PAUSE){
-    PVector frustumMovement = new PVector(4.*cos(0.1*num_frame),0.,0.);
-    dropsBox.translate(frustumMovement);
-    
-    drops.computeNbDropNeeded(dropsBox.computeArea());
-    drops.update(frustumMovement);
-    
-    num_frame++;
+  for(int i=0; i<dropsNeed ;i++) drops[i].recycle(dropsBox.getMovement());
+  
+  for(int i=0; i<DROPS_NB_MAX ;i++) {
+    drops[i].updatePosition();
+    drops[i].updateIntersection();  
   }
+  
+  dropsBox.update();
 }
 
 void keyPressed(){
@@ -90,10 +89,8 @@ void keyPressed(){
       case RIGHT : RAIN_INTENSITY += 0.01; break;
       case LEFT : RAIN_INTENSITY -= 0.01; break;
     } break;
-    case 'p' : PAUSE = !PAUSE; break;
     case 'i' : 
       println("frameRate: "+frameRate); 
-      println("numero frame: "+num_frame);
       println("intensity rain: "+RAIN_INTENSITY); 
   }
 }

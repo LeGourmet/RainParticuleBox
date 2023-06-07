@@ -1,17 +1,25 @@
 public class DropsBox{
+  private PVector _positionOld;
+  private PVector _position;
+  private float   _size;
+  
   private PVector[] vertex = new PVector[8];
   private PVector[] normales = new PVector[6];
   private int[] faces = new int[24];
   
-  public DropsBox(PVector center, float size){    
-    vertex[0] = PVector.add(center,new PVector( size, size, size));
-    vertex[1] = PVector.add(center,new PVector(-size, size, size));
-    vertex[2] = PVector.add(center,new PVector( size,-size, size));
-    vertex[3] = PVector.add(center,new PVector(-size,-size, size));
-    vertex[4] = PVector.add(center,new PVector( size, size,-size));
-    vertex[5] = PVector.add(center,new PVector(-size, size,-size));
-    vertex[6] = PVector.add(center,new PVector( size,-size,-size));
-    vertex[7] = PVector.add(center,new PVector(-size,-size,-size));
+  public DropsBox(PVector p_center, float p_size){
+    this._positionOld = new PVector(0.f,0.f,0.f);
+    this._position = p_center;
+    this._size = p_size;
+    
+    vertex[0] = new PVector( p_size, p_size, p_size);
+    vertex[1] = new PVector(-p_size, p_size, p_size);
+    vertex[2] = new PVector( p_size,-p_size, p_size);
+    vertex[3] = new PVector(-p_size,-p_size, p_size);
+    vertex[4] = new PVector( p_size, p_size,-p_size);
+    vertex[5] = new PVector(-p_size, p_size,-p_size);
+    vertex[6] = new PVector( p_size,-p_size,-p_size);
+    vertex[7] = new PVector(-p_size,-p_size,-p_size);
     
     normales[0] = new PVector( 1., 0., 0.);
     normales[1] = new PVector(-1., 0., 0.);
@@ -26,6 +34,22 @@ public class DropsBox{
     faces[12] = 1; faces[13] = 0; faces[14] = 4; faces[15] = 5;
     faces[16] = 5; faces[17] = 4; faces[18] = 6; faces[19] = 7;
     faces[20] = 1; faces[21] = 0; faces[22] = 2; faces[23] = 3;
+  
+    this._updateVertex();
+  }
+  
+  public PVector getMovement(){
+    return PVector.sub(_position,_positionOld);
+  }
+  
+  public float getArea(){
+    return _size*_size*_size;
+  }
+  
+  public void update(){
+    _positionOld.set(_position);
+    _position.set(100.f*cos(0.1*frameCount),0.f,0.f);
+    _updateVertex();
   }
   
   public void vertices(){
@@ -36,15 +60,7 @@ public class DropsBox{
         vertex(vertex[faces[i]]);
   }
   
-  public void translate(PVector t){
-    for(PVector v : vertex) v.add(t);
-  }
-  
-  public float computeArea(){
-    return SIZE_BOX*SIZE_BOX*SIZE_BOX; //todo change
-  }
-  
-  public boolean outside(PVector p){
+  public boolean isOutside(PVector p){
     for(int i=0; i<6 ;i++){
       PVector mid = new PVector(0.,0.,0.);
       mid.add(vertex[faces[4*i  ]]);
@@ -58,7 +74,7 @@ public class DropsBox{
     return false;
   }
   
-  public PVector generateDrop(PVector vec){
+  public PVector sampleSurface(PVector vec){
     int i;
     
     PVector dir = vec.copy().normalize();
@@ -83,5 +99,12 @@ public class DropsBox{
     point.add(PVector.mult(normales[i],random(0.01,PVector.dot(vec,normales[i]))));
     
     return point;
+  }
+  
+  private void _updateVertex(){
+    for(PVector vec : vertex) {
+      vec.sub(_positionOld);
+      vec.add(_position);
+    }
   }
 }
