@@ -46,18 +46,21 @@ public class DropsBox{
     return _size*_size*_size;
   }
   
-  public void update(){
+  public void update(PVector p_newPos){
     _positionOld.set(_position);
-    _position.set(100.f*cos(0.1*frameCount),0.f,0.f);
+    _position.set(p_newPos);
     _updateVertex();
   }
   
-  public void vertices(){
+  public void display(){
+    beginShape(QUADS);
     noFill();
     stroke(255);
     
     for(int i=0; i<24 ;i++)
         vertex(vertex[faces[i]]);
+        
+    endShape(CLOSE);
   }
   
   public boolean isOutside(PVector p){

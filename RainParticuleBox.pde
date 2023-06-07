@@ -11,8 +11,8 @@ float DROPS_SIZE_MIN = 2.f;      // mm
 float DROPS_SIZE_MAX = 8.f;      // mm
 float DROPS_CX       = 0.47f;
 
-PVector WIND         = new PVector(-50.,25.,0.);  // m/s
-PVector GRAVITY      = new PVector(0.,9.81,0.);   // m/s 
+PVector WIND         = new PVector(-50.f, 25.f,5.f);  // m/s
+PVector GRAVITY      = new PVector(  0.f,9.81f,0.f);  // m/s 
 
 PeasyCam camera;
 Drop[] drops = new Drop[DROPS_NB_MAX];
@@ -39,7 +39,7 @@ void setup(){
 
 void draw(){ 
   float dropsNeed = min(getNbDropsNeeded(),DROPS_NB_MAX);
-  //WIND = PVector.mult(WIND_FORCE,3.*abs(cos(frameCount*0.01)));
+  //WIND = PVector.mult(new PVector(10.f,0.f,0.f),3.*cos(frameCount*0.01));
  
   /*****************************************************************************************
    *****************                        DISPLAY                        *****************
@@ -47,10 +47,8 @@ void draw(){
   background(0.);
   lights();
   
-  // ------ DISPLAY FRUSTRUM ------
-  beginShape(QUADS);
-  //dropsBox.vertices();
-  endShape(CLOSE);
+  // ------ DISPLAY DROPS BOX ------
+  //dropsBox.display();
   
   // ------ DISPLAY OBSTACLES ------
   beginShape(TRIANGLES);
@@ -78,7 +76,7 @@ void draw(){
     drops[i].updateIntersection();  
   }
   
-  dropsBox.update();
+  //dropsBox.update(new PVector(100.f*sin(0.01*frameCount),0.f,0.f));
 }
 
 void keyPressed(){
