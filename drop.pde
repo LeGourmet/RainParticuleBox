@@ -33,7 +33,6 @@ public class Drop{
     _position = dropsBox.sampleSurface(V0_cam);
     _positionOld = PVector.sub(_position,PVector.mult(V0,DELTA_TIME));
     
-    // TODO use real Rain Shadow Map and use it for sampling
     for(Object o : obstacles)
       if(o.intersect(_position,PVector.mult(V0.normalize(),-1000.f))){
          _state = -1;
@@ -66,7 +65,6 @@ public class Drop{
     for(Object o : obstacles) 
         if(o.intersect(_position,_positionOld)) {
           _state = -1;
-          // TODO set _position in intersection position with offset with normal 
           return;
         }
         

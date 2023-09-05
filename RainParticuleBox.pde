@@ -25,13 +25,13 @@ void setup(){
   textSize(50.);
   textAlign(CENTER);
   
-  camera = new PeasyCam(this,1.5*SIZE_BOX);
-  camera.setRotations(0.f,-0.2f,0.f);
+  camera = new PeasyCam(this,2.*SIZE_BOX);
   camera.setMinimumDistance(0.001f);
   camera.setMaximumDistance(1000.f);
 
-  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),SIZE_BOX*0.1f  ,"./assets/cube.obj"));
-  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),10.f           ,"./assets/plane.obj"));
+  //obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),SIZE_BOX*0.1f  ,"./assets/cube.obj"));
+  //obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),10.f           ,"./assets/plane.obj"));
+    obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),SIZE_BOX*0.1f,"./assets/test.obj"));
 
   for(int i=0; i<DROPS_NB_MAX ;i++) drops[i] = new Drop();
 }
@@ -48,7 +48,7 @@ void draw(){
   lights();
   
   // ------ DISPLAY DROPS BOX ------
-  //dropsBox.display();
+  dropsBox.display();
   
   // ------ DISPLAY OBSTACLES ------
   beginShape(TRIANGLES);
@@ -61,10 +61,10 @@ void draw(){
   for(int i=0; i<DROPS_NB_MAX ;i++) drops[i].display();
   
   // ------ DISPLAY HUD ------
-  camera.beginHUD();
+  /*camera.beginHUD();
   fill(255);
   text("Number drops : " + (int) dropsNeed, width*0.5,height*0.1,0);
-  camera.endHUD();
+  camera.endHUD();*/
   
   /*****************************************************************************************
    *****************                         UPDATE                        *****************
@@ -90,5 +90,6 @@ void keyPressed(){
     case 'i' : 
       println("frameRate: "+frameRate); 
       println("intensity rain: "+RAIN_INTENSITY); 
+      break;
   }
 }
